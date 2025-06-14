@@ -64,9 +64,9 @@ module.exports.verifySuccess = (message) => {
 
     return `<html>
    <head>
-   <link rel="icon" href="/public/favicon.png" type="image/x-icon"/>
+  
 
-   <link rel="shortcut icon" href="/public/favicon.png" type="image/x-icon"/>
+   
    <title>Email Verification
    </title>
    <style> 
