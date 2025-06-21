@@ -25,7 +25,7 @@ module.exports.login = async (req, res, next) => {
 
         if (user && await utils.comparePassword(user.password, password)) {
             await adminSchema.updateOne({ _id: user._id }, { deviceToken })
-            return res.status(responseStatus.success).json(utils.successResponse(messages.loggedIn, { token: utils.SIGNJWT({ _id: user._id, password: user.password, deviceToken }) }))
+            return res.status(responseStatus.success).json(utils.successResponse(messages.loggedIn, { ...user, token: utils.SIGNJWT({ _id: user._id, password: user.password, deviceToken }) }))
         }
         else return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.correctEmailPass))
     }
