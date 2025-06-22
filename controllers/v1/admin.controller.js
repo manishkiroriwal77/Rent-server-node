@@ -95,7 +95,7 @@ module.exports.changePassword = async (req, res, next) => {
             await adminSchema.updateOne({ _id: user._id }, { password: await utils.hashPassword(newPassword) })
             return res.status(responseStatus.success).json(utils.successResponse(messages.passwordChanged))
         }
-        else return res.status(responseStatus.badRequest).json(utils.errorResponse(user.language == "en" ? messages.incorrectOldPassword : swMessages.incorrectOldPassword))
+        else return res.status(responseStatus.badRequest).json(utils.errorResponse( messages.incorrectOldPassword ))
     }
     catch (err) { return next(err) }
 }
