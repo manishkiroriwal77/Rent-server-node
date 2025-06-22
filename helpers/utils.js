@@ -4,13 +4,13 @@ const mongoose = require('mongoose')
 const userSchema = require('../models/user.model')
 const admin = require('firebase-admin')
 const serviceAccount = {
-    
+   
 }
 
 
-// admin.initializeApp({
-//     credential: admin.credential.cert(serviceAccount)
-// })
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+})
 
 
 
@@ -64,9 +64,9 @@ module.exports.verifySuccess = (message) => {
 
     return `<html>
    <head>
-  
+   <link rel="icon" href="/public/favicon.png" type="image/x-icon"/>
 
-   
+   <link rel="shortcut icon" href="/public/favicon.png" type="image/x-icon"/>
    <title>Email Verification
    </title>
    <style> 

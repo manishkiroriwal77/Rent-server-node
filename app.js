@@ -37,7 +37,10 @@ for (let i of arr) {
     if (!fs.existsSync(`public/${i}`)) fs.mkdir(`public/${i}`, (err) => { if (err) console.log('error=>', err) })
 }
 
-app.use(cors())
+app.use(cors({
+    origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']
+}))
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: false }));
 

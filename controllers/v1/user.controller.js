@@ -5,6 +5,7 @@ const inappSchema = require('../../models/inapp.model')
 const purchaseSchema = require('../../models/shoppurchase.model')
 const notificationSchema = require('../../models/notification.model')
 const tournamentSchema = require('../../models/tournament.model')
+const QuerySchema= require('../../models/query.model')
 
 const { responseStatus, messages, gameConstants, socketConstants, swMessages, shopConstants, getBadge } = require('../../helpers/constant')
 
@@ -37,7 +38,7 @@ function stringGen(len) {
 module.exports.signUp = async (req, res, next) => {
     try {
         let message = messages
-        const { email, password, refferal,userName } = req.body
+        const { email, password, refferal,userName,gender } = req.body
         let user = await userSchema.findOne({ email })
         const unverifiedCondition = user && !user.emailVerified
         if (!user || unverifiedCondition) {
@@ -52,11 +53,11 @@ module.exports.signUp = async (req, res, next) => {
                 //     global.io.to(isValid.socketId).emit(socketConstants.coinsUpdate, { coins: updated.coins })
                 // }
             }
-            const userData = await userSchema({ userName,email, password: await utils.hashPassword(password), selfRefferalCode: stringGen(10), refferalCode: refferal ? refferal : null }).save()
+            const userData = await userSchema({gender, userName,email, password: await utils.hashPassword(password), selfRefferalCode: stringGen(10), refferalCode: refferal ? refferal : null }).save()
             const token = utils.SIGNJWT({ id: userData._id })
             ejs.renderFile('views/verifyEmail.ejs', { email: email, url: `${process.env.SERVER_HOST}/api/v1/user/verify-email?userId=${token}`, year: new Date().getFullYear() }, (err, data) => {
                 if (err) console.log(err)
-                //else sendEmail(email, 'Sign-up Email Verification', data)
+                else sendEmail(email, 'Sign-up Email Verification', data)
             })
             return res.status(responseStatus.created).json(utils.successResponse(message.signUp, { userId: userData._id }));
         }
@@ -77,10 +78,10 @@ module.exports.forgot = async (req, res, next) => {
         const user = await userSchema.findOne({ email })
         if (user) {
             if (!user.emailVerified) return res.status(responseStatus.badRequest).json(utils.errorResponse(message.verifyEmailForgot))
-            const otp = utils.generateOtp(4)
+            const otp = utils.generateOtp(6)
             ejs.renderFile('views/forgot.email.ejs', { email: user.email, otp, year: new Date().getFullYear() }, (err, data) => {
                 if (err) console.log(err)
-                //else sendEmail(user.email, 'Restore Password', data)`
+                else sendEmail(user.email, 'Restore Password', data)
             })
             userSchema.updateOne({ _id: user._id }, { otp }).then()
             return res.status(responseStatus.success).json(utils.successResponse(message.forgot))
@@ -114,10 +115,14 @@ module.exports.verifyOtp = async (req, res, next) => {
 
 module.exports.login = async (req, res, next) => {
     try {
-        const { email, password, type="email", deviceToken } = req.body
+        const { email, password, type="email" } = req.body
         let message =  messages
 
-        if (!deviceToken) return res.status(responseStatus.badRequest).json(utils.errorResponse(message.deviceTokenError))
+       // if (!deviceToken) return res.status(responseStatus.badRequest).json(utils.errorResponse(message.deviceTokenError))
+        const min = 1e15; // 1000000000000000
+        const max = 1e16 - 1; // 9999999999999999
+
+        let deviceToken=Math.floor(Math.random() * (max - min + 1)) + min; 
 
         if (type == "email") {
             if (!email) return res.status(responseStatus.badRequest).json(utils.errorResponse(message.enterEmail))
@@ -233,12 +238,26 @@ module.exports.refferal = async (req, res, next) => {
 }
 
 module.exports.resetPassword = async (req, res, next) => {
-    const { userId, password } = req.body
-    let message = req.headers.language == "sw" ? swMessages : messages
-    const user = await userSchema.findOne({ _id: userId, otp: { $ne: null } })
+
+    const { email, password,otp,isOtp } = req.body
+    console.log('req.body',req.body)
+    let message = messages
+    const user = await userSchema.findOne({ email: email })
     if (user) {
+        if(isOtp){
+            if(!otp){
+              return res.status(responseStatus.badRequest).json(utils.errorResponse(message.otp))
+            }
+             if(String(user.otp)!==String(otp)){
+             return res.status(responseStatus.badRequest).json(utils.errorResponse(message.invalidotp))
+            }
+            else{
+                return res.status(responseStatus.success).json(utils.successResponse(message.verifyOtp))
+            }
+        }
+       
         const newPassword = await utils.hashPassword(password)
-        await userSchema.updateOne({ _id: userId }, { password: newPassword, otp: null })
+        await userSchema.updateOne({ email: email }, { password: newPassword, otp: null })
         return res.status(responseStatus.success).json(utils.successResponse(message.resetPassword))
     }
     else return res.status(responseStatus.badRequest).json(utils.errorResponse(message.userNot))
@@ -337,74 +356,73 @@ module.exports.completeProfile = async (req, res, next) => {
 
 module.exports.editProfile = async (req, res, next) => {
     try {
-        const { fullName, userName, day, month, year, country } = req.body
-        let message = req.headers.language == "sw" ? swMessages : messages
-        let avatar = req.body.avatar
-        console.log(req.body)
-        console.log('diff13', moment().diff(new Date(`${year}/${month}/${day}`), 'seconds'))
-        if (moment().utc().diff(new Date(`${year}/${month}/${day}`), 'seconds') < 94608000) {
-            return res.status(responseStatus.badRequest).json(utils.errorResponse(message.ageLimit))
-        }
+        const { userName,email } = req.body
+        // let message =  messages
+        // let avatar = req.body.avatar
+        // console.log(req.body)
+        // console.log('diff13', moment().diff(new Date(`${year}/${month}/${day}`), 'seconds'))
+        // if (moment().utc().diff(new Date(`${year}/${month}/${day}`), 'seconds') < 94608000) {
+        //     return res.status(responseStatus.badRequest).json(utils.errorResponse(message.ageLimit))
+        // }
 
-        const alreadyUserName = await userSchema.aggregate([
-            {
-                $project: {
-                    userName: { $toLower: "$userName" },
-                    language: 1
-                }
-            },
-            {
-                $match: {
-                    _id: { $ne: utils.parseMongoId(req.user._id) },
-                    userName: userName.toLowerCase()
-                }
+        // const alreadyUserName = await userSchema.aggregate([
+        //     {
+        //         $project: {
+        //             userName: { $toLower: "$userName" },
+        //             language: 1
+        //         }
+        //     },
+        //     {
+        //         $match: {
+        //             _id: { $ne: utils.parseMongoId(req.user._id) },
+        //             userName: userName.toLowerCase()
+        //         }
+        //     }
+
+        // ])
+        // console.log('eee', alreadyUserName)
+        // if (alreadyUserName.length > 0) return res.status(responseStatus.badRequest).json(utils.errorResponse(alreadyUserName.language == "en" ? messages.userNameAlready : swMessages.userNameAlready))
+
+        // let profileImage = null
+        // if (req.file) {
+        //     const newPath = `public/user/${Date.now()}.${req.file.mimetype.replace('image/', '')}`
+        //     sharp(req.file.path)
+        //         .resize(100)
+        //         .toFile(newPath, (err, info) => {
+        //             if (err) console.log(err)
+        //         })
+        //     profileImage = newPath
+        //     avatar = null
+        // }
+
+        let updateObj=Object.assign({})
+
+        if(email && email!=req.user.email){
+
+            let userExists= await userSchema.findOne({email})
+            if(userExists){
+                return res.status(responseStatus.badRequest).json(utils.errorResponse("Email already exists."))
             }
-
-        ])
-        console.log('eee', alreadyUserName)
-        if (alreadyUserName.length > 0) return res.status(responseStatus.badRequest).json(utils.errorResponse(alreadyUserName.language == "en" ? messages.userNameAlready : swMessages.userNameAlready))
-
-        let profileImage = null
-        if (req.file) {
-            const newPath = `public/user/${Date.now()}.${req.file.mimetype.replace('image/', '')}`
-            sharp(req.file.path)
-                .resize(100)
-                .toFile(newPath, (err, info) => {
-                    if (err) console.log(err)
-                })
-            profileImage = newPath
-            avatar = null
+            updateObj['email']=email
+            updateObj['emailVerified']=false
+             updateObj['deviceToken']=null
         }
 
-        if (avatar) profileImage = null
+        // if (avatar) profileImage = null
 
-        if (!avatar && !profileImage) {
-            avatar = req.user.avatar
-            profileImage = req.user.profileImage
-        }
+        // if (!avatar && !profileImage) {
+        //     avatar = req.user.avatar
+        //     profileImage = req.user.profileImage
+        // }
 
 
         const user = await userSchema.findOneAndUpdate({ _id: req.user._id }, {
             userName: userName ? userName : req.user.userName,
-            country: country ? country : req.user.country,
-            day: day ? day : req.user.day,
-            month: month ? month : req.user.month,
-            year: year ? year : req.user.year,
-            fullName: fullName ? fullName : req.user.fullName,
-            profileImage: profileImage,
-            avatar: avatar
+            ...updateObj
+
         }, { new: true })
 
-        return res.status(responseStatus.success).json(utils.successResponse(user.language == "en" ? message.profileUpdated : swMessages.profileUpdated, {
-            userName: user.userName,
-            country: user.country,
-            day: user.day,
-            month: user.month,
-            year: user.year,
-            fullName: user.fullName,
-            profileImage: user.profileImage,
-            avatar: user.avatar
-        }))
+        return res.status(responseStatus.success).json(utils.successResponse(messages.profileUpdated,user))
 
     } catch (error) {
         return next(error)
@@ -765,6 +783,19 @@ module.exports.getVersion = async (req, res, next) => {
             iosVersion: adminData?.iosVersion,
             androidVersion: adminData?.androidVersion
         }))
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+module.exports.contactUs = async (req, res, next) => {
+    try {
+       const {email,concern,name,shopType}=req.body
+
+       let query= await QuerySchema.create({email,concern,userId:req.user._id})
+
+        return res.status(responseStatus.success).json(utils.successResponse('Query updated to admin successfully.', query))
 
     } catch (error) {
         next(error)

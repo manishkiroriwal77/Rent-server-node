@@ -11,6 +11,7 @@ const { sendEmail } = require('../../helpers/email')
 const moment = require('moment')
 const ejs = require('ejs')
 const shopModel = require('../../models/shop.model')
+const QuerySchema=require('../../models/query.model')
 const { selfExit } = require('./gamePlay.controller')
 const gamePlayhelper = require('./gamePlayhelper')
 
@@ -25,7 +26,7 @@ module.exports.login = async (req, res, next) => {
 
         if (user && await utils.comparePassword(user.password, password)) {
             await adminSchema.updateOne({ _id: user._id }, { deviceToken })
-            return res.status(responseStatus.success).json(utils.successResponse(messages.loggedIn, { ...user, token: utils.SIGNJWT({ _id: user._id, password: user.password, deviceToken }) }))
+            return res.status(responseStatus.success).json(utils.successResponse(messages.loggedIn, { token: utils.SIGNJWT({ _id: user._id, password: user.password, deviceToken }) }))
         }
         else return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.correctEmailPass))
     }
@@ -1061,6 +1062,66 @@ module.exports.notificationList = async (req, res, next) => {
                     createdAt: 1
                 }
             },
+            {
+                "$facet": {
+                    data: pagination,
+                    totalCount: [
+                        { "$count": "count" }
+                    ]
+                }
+            },
+            {
+                $unwind: {
+                    path: "$totalCount",
+                    preserveNullAndEmptyArrays: true
+                }
+            }
+
+
+        ])
+        let totalCount = notificationList && notificationList[0] && notificationList[0].totalCount ? notificationList[0].totalCount.count : 0
+        return res.status(responseStatus.success).json(utils.successResponse(messages.notificationList, {
+            data: notificationList[0].data,
+            paginationData: utils.paginationData(totalCount, limit ? limit : 10, offset ? offset : 0)
+        }))
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+module.exports.QueryList = async (req, res, next) => {
+    try {
+        const { offset, limit, search, sort, order } = req.body
+        const pagination = [{ $skip: offset ? offset : 0 }, { $limit: limit ? limit : 10 }]
+        const notificationList = await QuerySchema.aggregate([
+            ...(search ? [{
+                $match: {
+                    $or: [
+                        { email: { $regex: new RegExp(('.*' + search + '.*'), "i") } },
+                        { name: { $regex: new RegExp(('.*' + search + '.*'), "i") } },
+                        { concern: { $regex: new RegExp(('.*' + search + '.*'), "i") } },
+                        { shopType: { $regex: new RegExp(('.*' + search + '.*'), "i") } }
+                    ]
+                }
+
+            }] : []),
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            },
+            {
+                $lookup:{
+                    from:"users",
+                    localField:"userId",
+                    foreignField:"_id",
+                    as:"user"
+
+                }
+            },
+            {$unwind:{path:"$user",preserveNullAndEmptyArrays:true}},
             {
                 "$facet": {
                     data: pagination,

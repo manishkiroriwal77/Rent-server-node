@@ -23,11 +23,12 @@ userRoutes.post('/completeProfile', auth, multer, validator(validation.completeP
 
 userRoutes.post('/refferal', auth, validator(validation.refferal), userController.refferal)
 
-userRoutes.get('/getProfile', auth, userController.getProfile)
+userRoutes.post('/getProfile', auth, userController.getProfile)
 
-userRoutes.post('/editProfile', auth, multer, userController.editProfile)
+userRoutes.post('/editProfile', auth, userController.editProfile)
 
 userRoutes.get('/verify-email', userController.verifyEmail)
+
 
 userRoutes.post('/verify-otp', validator(validation.verifyOtp), userController.verifyOtp)
 
@@ -54,5 +55,8 @@ userRoutes.get('/termsAndConditions', userController.termsAndConditions)
 userRoutes.post('/get-fixture-data', auth, validator(validation.getFixtureScreen), userController.getFixtureSrceenData)
 
 userRoutes.get('/get-version', userController.getVersion)
+
+userRoutes.post('/contact-us',auth,validator(validation.contactUs), userController.contactUs)
+
 
 module.exports = userRoutes

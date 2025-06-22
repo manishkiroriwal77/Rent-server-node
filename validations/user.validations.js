@@ -8,7 +8,8 @@ module.exports.signUp = yup.object({
         userName:yup.string().required(),
         email: yup.string().required().email(),
         password: yup.string().required(),
-        refferal: yup.string().optional()
+        refferal: yup.string().optional(),
+        gender:yup.string().required().oneOf(["male","female","others"])
     })
 })
 
@@ -31,8 +32,8 @@ module.exports.login = yup.object({
         //socialId: yup.string().required(),
         email: yup.string().required(),
         password:yup.string().required(),
-        deviceToken: yup.string().required(),
-        deviceToken: yup.string().required(),
+        deviceToken: yup.string().optional(),
+       // deviceToken: yup.string().required(),
         // deviceToken: yup.string().required('Something went wrong. Please restart the application.')
     })
 })
@@ -46,8 +47,10 @@ module.exports.adminLogin = yup.object({
 
 module.exports.resetPassword = yup.object({
     body: yup.object({
-        userId: yup.string().matches(gameConstants.regexForMongoId, messages.validUserId).required(),
-        password: yup.string().required(),
+        email:yup.string().required().email(),
+        password: yup.string().optional(),
+        otp: yup.string().optional(),
+        isOtp:yup.boolean().required()
     })
 })
 
@@ -168,6 +171,15 @@ module.exports.editShopItem = yup.object({
 module.exports.getFixtureScreen = yup.object({
     body: yup.object({
         tournament: yup.string().required()
+    })
+})
+
+module.exports.contactUs = yup.object({
+    body: yup.object({
+        email: yup.string().required().email(),
+        concern:yup.string().required(),
+        name:yup.string().required(),
+        shopType:yup.string().required()
     })
 })
 

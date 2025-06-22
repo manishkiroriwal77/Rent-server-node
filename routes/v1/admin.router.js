@@ -58,6 +58,8 @@ adminRoutes.get('/logout', auth, adminController.logout)
 
 adminRoutes.post('/notification', auth, adminController.sendNotification)
 
+adminRoutes.post('/query-list', auth, adminController.QueryList)
+
 adminRoutes.post('/notification-list', auth, adminController.notificationList)
 
 adminRoutes.put('/notification-edit', auth, validator(validation.notificationEdit), adminController.editNotification)

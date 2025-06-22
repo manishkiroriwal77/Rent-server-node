@@ -38,7 +38,8 @@ const userSchema = mongoose.Schema({
     totalWins: { type: Number, default: 0 },
     socialId: { type: String, default: null },
     //type:{type: String, default: null,enum:['apple','google'] },
-    firstLogin:{type:Boolean,default:true}
+    firstLogin:{type:Boolean,default:true},
+    gender:{type:String,enum:["male","female","others"],default:"male"}
 }, { timestamps: true })
 
 module.exports = mongoose.model('user', userSchema)
