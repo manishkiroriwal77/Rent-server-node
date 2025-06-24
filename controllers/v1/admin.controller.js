@@ -824,6 +824,7 @@ module.exports.tournamentDetail = async (req, res) => {
 }
 
 
+
 module.exports.shopList = async (req, res, next) => {
     const { offset, limit, search, sort, order, type } = req.body
 
@@ -837,13 +838,10 @@ module.exports.shopList = async (req, res, next) => {
     const shops = await shopSchema.aggregate([
         {
             $match: {
-                type,
                 ...(search && {
                     $or: [
-                        { nameEn: { $regex: new RegExp(('.*' + search + '.*'), "i") } },
-                        { nameSw: { $regex: new RegExp(('.*' + search + '.*'), "i") } },
-                        { type: { $regex: new RegExp(('.*' + search + '.*'), "i") } },
-                        { cost: { $regex: new RegExp(('.*' + search + '.*'), "i") } },
+                        { name: { $regex: new RegExp(('.*' + search + '.*'), "i") } },
+                        { status: { $regex: new RegExp(('.*' + search + '.*'), "i") } },
                     ]
                 })
             }
@@ -993,20 +991,19 @@ module.exports.gameList = async (req, res) => {
 
 
 module.exports.addShop = async (req, res, next) => {
-    const { nameEn, nameSw, cost, type } = req.body
-    if (!req.file) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.uploadImage))
-    let imageUrl = req.file.path
+    const { name,status } = req.body
 
-    await shopSchema({ nameEn, nameSw, cost, type, imageUrl }).save()
+    let shop=await shopSchema({ name,status }).save()
 
-    res.status(responseStatus.success).json(utils.successResponse(messages.shopAdded(type == 'skins' ? 'Theme' : type == 'cardDecks' ? 'Card' : 'Emoji')))
+    return res.status(responseStatus.success).json(utils.successResponse("Shop added successfully.",shop))
 
 }
 
 
 module.exports.shopView = async (req, res, next) => {
-    const id = req.params.id
-    const shopExists = await shopSchema.findOne({ _id: id }).select('nameEn nameSw type costType cost imageUrl createdAt')
+    const id = req.body.id
+     if (!utils.validMongoId(id)) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
+    const shopExists = await shopSchema.findOne({ _id: id }).populate('users')
     if (shopExists) return res.status(responseStatus.success).json(utils.successResponse(messages.shopDetails, shopExists))
     else return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
 
@@ -1014,19 +1011,19 @@ module.exports.shopView = async (req, res, next) => {
 
 module.exports.shopEdit = async (req, res, next) => {
 
-    const { nameEn, nameSw, cost, type, id } = req.body
+    const { name,status, id } = req.body
     if (!utils.validMongoId(id)) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
 
     const shopExists = await shopSchema.findOne({ _id: id }).select('_id imageUrl').lean()
     if (!shopExists) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
 
-    await shopSchema.updateOne({ _id: shopExists._id }, { nameEn, nameSw, cost, type, imageUrl: req.file ? req.file.path : shopExists.imageUrl })
-    return res.status(responseStatus.success).json(utils.errorResponse(messages.shopItemUpdated(type == 'skins' ? 'Theme' : type == 'cardDecks' ? 'Card' : 'Emoji')))
+   let shopData =  await shopSchema.findOneAndUpdate({ _id: shopExists._id }, { name, status },{new:true})
+    return res.status(responseStatus.success).json(utils.errorResponse("Shop updated successfully.",shopData))
 }
 
 module.exports.shopDelete = async (req, res, next) => {
 
-    const id = req.params.id;
+    const id = req.body.id;
     if (!utils.validMongoId(id)) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
 
     const shopExists = await shopSchema.findOne({ _id: id }).select('_id').lean();

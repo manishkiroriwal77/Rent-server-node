@@ -56,7 +56,7 @@ userRoutes.post('/get-fixture-data', auth, validator(validation.getFixtureScreen
 
 userRoutes.get('/get-version', userController.getVersion)
 
-userRoutes.post('/contact-us',auth,validator(validation.contactUs), userController.contactUs)
+userRoutes.post('/contact-us',validator(validation.contactUs),auth, userController.contactUs)
 
 
 module.exports = userRoutes

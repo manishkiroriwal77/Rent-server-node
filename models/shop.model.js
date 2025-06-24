@@ -2,14 +2,9 @@ const mongoose = require('mongoose')
 
 const { shopConfig } = require('../helpers/shopConfig')
 const shopSchema = mongoose.Schema({
-
-    nameEn: { type: String },
-    nameSw: { type: String },
-    type: { type: String, enum: shopConfig.shopTypes },
-    cost: { type: String },
-    costType: { type: String, enum: shopConfig.costTypes },
-    imageUrl: { type: String },
-    coinsGet: { type: String }
+    name: { type: String },
+    status: { type: String, enum:["rented","non-rented"] },
+    users: [{ type: mongoose.Types.ObjectId, default: null, ref: 'user'}],
 
 }, { timestamps: true })
 

@@ -793,7 +793,7 @@ module.exports.contactUs = async (req, res, next) => {
     try {
        const {email,concern,name,shopType}=req.body
 
-       let query= await QuerySchema.create({email,concern,userId:req.user._id})
+       let query= await QuerySchema.create({email,concern,userId:req.user._id,name,shopType})
 
         return res.status(responseStatus.success).json(utils.successResponse('Query updated to admin successfully.', query))
 

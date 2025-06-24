@@ -150,21 +150,17 @@ module.exports.notificationEdit = yup.object({
 
 module.exports.addShopItem = yup.object({
     body: yup.object({
-        nameEn: yup.string().required(),
-        nameSw: yup.string().required(),
-        cost: yup.string().required(),
-        type: yup.string().required().oneOf(['coins', 'skins', 'cardDecks', 'emojis']),
+        name: yup.string().required(),
+        status: yup.string().oneOf(["rented","non-rented"]).required()
     })
 })
 
 
 module.exports.editShopItem = yup.object({
     body: yup.object({
-        nameEn: yup.string().required(),
-        nameSw: yup.string().required(),
-        cost: yup.string().required(),
-        type: yup.string().required().oneOf(['coins', 'skins', 'cardDecks', 'emojis']),
-        id: yup.string().required(),
+       id: yup.string().required(),
+       name: yup.string().required(),
+       status: yup.string().oneOf(["rented","non-rented"]).required()
     })
 })
 

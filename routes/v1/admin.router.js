@@ -48,11 +48,11 @@ adminRoutes.post('/shop-list', auth, adminController.shopList)
 
 adminRoutes.post('/shop-add', auth, multer, validator(validation.addShopItem), adminController.addShop)
 
-adminRoutes.get('/shop-view/:id', auth, adminController.shopView)
+adminRoutes.post('/shop-view', auth, adminController.shopView)
 
-adminRoutes.delete('/shop-delete/:id', auth, adminController.shopDelete)
+adminRoutes.post('/shop-delete', auth, adminController.shopDelete)
 
-adminRoutes.put('/shop-edit', auth, multer, validator(validation.editShopItem), adminController.shopEdit)
+adminRoutes.post('/shop-edit', auth, multer, validator(validation.editShopItem), adminController.shopEdit)
 
 adminRoutes.get('/logout', auth, adminController.logout)
 
