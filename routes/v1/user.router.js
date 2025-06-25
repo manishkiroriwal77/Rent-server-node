@@ -58,5 +58,8 @@ userRoutes.get('/get-version', userController.getVersion)
 
 userRoutes.post('/contact-us',validator(validation.contactUs),auth, userController.contactUs)
 
+userRoutes.post('/enterShop',validator(validation.enterShop),auth, userController.enterShop)
+
+
 
 module.exports = userRoutes

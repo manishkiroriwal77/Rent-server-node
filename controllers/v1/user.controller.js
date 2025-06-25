@@ -6,6 +6,7 @@ const purchaseSchema = require('../../models/shoppurchase.model')
 const notificationSchema = require('../../models/notification.model')
 const tournamentSchema = require('../../models/tournament.model')
 const QuerySchema= require('../../models/query.model')
+const shopRentSchema= require('../../models/shopRent.model')
 
 const { responseStatus, messages, gameConstants, socketConstants, swMessages, shopConstants, getBadge } = require('../../helpers/constant')
 
@@ -796,6 +797,29 @@ module.exports.contactUs = async (req, res, next) => {
        let query= await QuerySchema.create({email,concern,userId:req.user._id,name,shopType})
 
         return res.status(responseStatus.success).json(utils.successResponse('Query updated to admin successfully.', query))
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+module.exports.enterShop = async (req, res, next) => {
+    try {
+       const {shopId}=req.body
+
+      if (!utils.validMongoId(shopId)) return res.status(responseStatus.badRequest).json(utils.errorResponse("Invalid shopId"));
+
+      let shopRentStatus= await shopRentSchema.findOne({userId:req.user._id,shopId})
+
+      if(shopRentStatus){
+        return res.status(responseStatus.badRequest).json(utils.errorResponse("Shop already rented."));
+      }
+
+      let shopRent=await shopRentSchema({shopId,userId:req.user._id}).save()
+    
+
+      return res.status(responseStatus.success).json(utils.successResponse('Shop rented successfully..', shopRent))
 
     } catch (error) {
         next(error)

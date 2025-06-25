@@ -1207,3 +1207,19 @@ module.exports.updateVersion = async (req, res, next) => {
 
 }
 
+module.exports.addmanualUser = async (req, res, next) => {
+
+    const { email, password, userName,gender } = req.body;
+
+    let userExists= await userSchema.findOne({email:email})
+
+    if(userExists){
+        return res.status(responseStatus.badRequest).json(utils.errorResponse("Email already exist's"))
+    }
+
+    const userData = await userSchema({
+      gender, userName,email, password: await utils.hashPassword(password),emailVerified:true }).save()
+
+     return res.status(responseStatus.success).json(utils.successResponse("User added sucessfully",userData))
+}
+

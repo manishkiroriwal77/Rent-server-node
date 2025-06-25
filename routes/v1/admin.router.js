@@ -20,6 +20,8 @@ adminRoutes.post('/change-password', auth, validator(validation.changePassword),
 
 adminRoutes.get('/dashboard', auth, adminController.dashboard)
 
+adminRoutes.post('/user-manual', auth, adminController.userList)
+
 adminRoutes.post('/user-list', auth, adminController.userList)
 
 adminRoutes.put('/block/:id', auth, adminController.block)
@@ -71,6 +73,9 @@ adminRoutes.post('/game-list', auth, adminController.gameList)
 adminRoutes.get('/get-version', auth, adminController.getVersion)
 
 adminRoutes.put('/update-version', auth, validator(validation.versoinUpdate), adminController.updateVersion)
+
+adminRoutes.post('/manual-user', auth, validator(validation.manualUser), adminController.addmanualUser)
+
 
 
 module.exports = adminRoutes

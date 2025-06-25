@@ -179,6 +179,12 @@ module.exports.contactUs = yup.object({
     })
 })
 
+module.exports.enterShop = yup.object({
+    body: yup.object({
+        shopId: yup.string().required()
+    })
+})
+
 module.exports.refferal = yup.object({
     body: yup.object({
         refferal: yup.string().required(),
@@ -189,5 +195,15 @@ module.exports.versoinUpdate = yup.object({
     body: yup.object({
         androidVersion: yup.string().required(),
         iosVersion: yup.string().required()
+    })
+})
+
+
+module.exports.manualUser = yup.object({
+    body: yup.object({
+        userName:yup.string().required(),
+        email: yup.string().required().email(),
+        password: yup.string().required(),
+        gender:yup.string().required().oneOf(["male","female","others"])
     })
 })
