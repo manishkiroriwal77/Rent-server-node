@@ -1018,7 +1018,7 @@ module.exports.shopEdit = async (req, res, next) => {
     if (!shopExists) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
 
    let shopData =  await shopSchema.findOneAndUpdate({ _id: shopExists._id }, { name, status },{new:true})
-    return res.status(responseStatus.success).json(utils.errorResponse("Shop updated successfully.",shopData))
+    return res.status(responseStatus.success).json(utils.successResponse("Shop updated successfully.",shopData))
 }
 
 module.exports.shopDelete = async (req, res, next) => {
