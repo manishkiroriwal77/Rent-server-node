@@ -437,7 +437,7 @@ module.exports.block = async (req, res) => {
 }
 
 module.exports.userView = async (req, res) => {
-    const userId = req.params.id
+    const userId = req.body.id
     if (!utils.validMongoId(userId)) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.inValidId))
     let userDetails = await userSchema.findOne({ _id: userId }).select('userName fullName email profileImage avatar coins isBlock')
     if (userDetails) {
