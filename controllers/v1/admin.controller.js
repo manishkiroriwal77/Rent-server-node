@@ -439,7 +439,7 @@ module.exports.block = async (req, res) => {
 module.exports.userView = async (req, res) => {
     const userId = req.params.id
     if (!utils.validMongoId(userId)) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.inValidId))
-    let userDetails = await userSchema.findOne({ _id: userId }).select('userName fullName email profileImage avatar coins')
+    let userDetails = await userSchema.findOne({ _id: userId }).select('userName fullName email profileImage avatar coins isBlock')
     if (userDetails) {
         return res.status(responseStatus.success).json(utils.successResponse(messages.details, userDetails))
     }
@@ -1030,7 +1030,7 @@ module.exports.shopDelete = async (req, res, next) => {
     if (!shopExists) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound));
 
     await shopSchema.deleteOne({ _id: id });
-    return res.status(responseStatus.success).json(utils.errorResponse(messages.shopItemDeleted))
+    return res.status(responseStatus.success).json(utils.successResponse(messages.shopItemDeleted))
 }
 
 module.exports.notificationList = async (req, res, next) => {
