@@ -13,7 +13,7 @@ module.exports.sendEmail = (email, subject, html) => {
         }
     })
     const mailDetails = {
-        from: `Albastini<${process.env.EMAIL_USER}>`,
+        from: `Wedding city<${process.env.EMAIL_USER}>`,
         to: email,
         subject: subject,
         html: html

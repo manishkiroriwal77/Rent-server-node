@@ -39,7 +39,7 @@ adminRoutes.post(
   adminController.changePassword
 );
 
-adminRoutes.get("/dashboard", auth, adminController.dashboard);
+adminRoutes.post("/dashboard", auth, adminController.dashboard);
 
 adminRoutes.post("/user-manual", auth, adminController.userList);
 

@@ -133,7 +133,7 @@ module.exports.login = async (req, res, next) => {
             const user = await userSchema.findOne({ email })
 
             if (user && user.emailVerified) {
-                //if (user.isBlock) return res.status(responseStatus.badRequest).json(utils.errorResponse(user.language == "en" ? messages.blocked : swMessages.blocked))
+                if (user.isBlock) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.blocked))
                 const checkPassword = await utils.comparePassword(user.password, password)
                 if (checkPassword) {
                     //const alreadyMatch = await matchSchema.findOne({ players: user?._id, endTime: null }).lean()
@@ -810,16 +810,16 @@ module.exports.enterShop = async (req, res, next) => {
 
       if (!utils.validMongoId(shopId)) return res.status(responseStatus.badRequest).json(utils.errorResponse("Invalid shopId"));
 
-      let shopRentStatus= await shopRentSchema.findOne({userId:req.user._id,shopId})
+      //let shopRentStatus= await shopRentSchema.findOne({userId:req.user._id,shopId})
 
-      if(shopRentStatus){
-        return res.status(responseStatus.badRequest).json(utils.errorResponse("Shop already rented."));
-      }
+    //   if(shopRentStatus){
+    //     return res.status(responseStatus.badRequest).json(utils.errorResponse("Shop already rented."));
+    //   }
 
       let shopRent=await shopRentSchema({shopId,userId:req.user._id}).save()
     
 
-      return res.status(responseStatus.success).json(utils.successResponse('Shop rented successfully..', shopRent))
+      return res.status(responseStatus.success).json(utils.successResponse('Entry noted successfully.', shopRent))
 
     } catch (error) {
         next(error)

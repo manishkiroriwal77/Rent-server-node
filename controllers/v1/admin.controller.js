@@ -116,209 +116,217 @@ module.exports.dashboard = async (req, res, next) => {
         let last3MonthStart = new Date(today.clone().subtract(3, 'Month'))
         let lastYearStart = new Date(today.clone().startOf('year'))
 
-        let userList = await userSchema.aggregate([
-            {
-                $group: {
-                    _id: null,
-                    users: {
-                        $push: { createdAt: '$$ROOT.createdAt' }
-                    }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    total: { $size: '$users' },
-                    today: {
-                        $size: {
-                            $filter: {
-                                input: "$users",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", startOfDay] },
-                                        { $lte: ["$$user.createdAt", endOfDay] }
-                                    ]
+        // let userList = await userSchema.aggregate([
+        //     {
+        //         $group: {
+        //             _id: null,
+        //             users: {
+        //                 $push: { createdAt: '$$ROOT.createdAt' }
+        //             }
+        //         }
+        //     },
+        //     {
+        //         $project: {
+        //             _id: 0,
+        //             total: { $size: '$users' },
+        //             today: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$users",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", startOfDay] },
+        //                                 { $lte: ["$$user.createdAt", endOfDay] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    },
-                    week: {
-                        $size: {
-                            $filter: {
-                                input: "$users",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", lastWeekStart] },
-                                        { $lte: ["$$user.createdAt", lastWeekEnd] }
-                                    ]
+        //                 }
+        //             },
+        //             week: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$users",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", lastWeekStart] },
+        //                                 { $lte: ["$$user.createdAt", lastWeekEnd] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    },
-                    month: {
-                        $size: {
-                            $filter: {
-                                input: "$users",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", lastMonthStart] },
-                                        { $lte: ["$$user.createdAt", lastMonthEnd] }
-                                    ]
+        //                 }
+        //             },
+        //             month: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$users",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", lastMonthStart] },
+        //                                 { $lte: ["$$user.createdAt", lastMonthEnd] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    },
-                    quater: {
-                        $size: {
-                            $filter: {
-                                input: "$users",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", last3MonthStart] },
-                                        // { $lte: ["$$user.createdAt", l] }
-                                    ]
+        //                 }
+        //             },
+        //             quater: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$users",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", last3MonthStart] },
+        //                                 // { $lte: ["$$user.createdAt", l] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    },
-                    year: {
-                        $size: {
-                            $filter: {
-                                input: "$users",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", lastYearStart] },
-                                        // { $lte: ["$$user.createdAt", l] }
-                                    ]
+        //                 }
+        //             },
+        //             year: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$users",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", lastYearStart] },
+        //                                 // { $lte: ["$$user.createdAt", l] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    }
+        //                 }
+        //             }
 
-                }
-            }
+        //         }
+        //     }
 
-        ])
+        // ])
 
-        let matchList = await matchSchema.aggregate([
-            {
-                $match: {
-                    endTime: { $ne: null }
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    matches: { $push: { createdAt: '$$ROOT.createdAt' } }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    total: { $size: '$matches' },
-                    today: {
-                        $size: {
-                            $filter: {
-                                input: "$matches",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", startOfDay] },
-                                        { $lte: ["$$user.createdAt", endOfDay] }
-                                    ]
+        // let matchList = await matchSchema.aggregate([
+        //     {
+        //         $match: {
+        //             endTime: { $ne: null }
+        //         }
+        //     },
+        //     {
+        //         $group: {
+        //             _id: null,
+        //             matches: { $push: { createdAt: '$$ROOT.createdAt' } }
+        //         }
+        //     },
+        //     {
+        //         $project: {
+        //             _id: 0,
+        //             total: { $size: '$matches' },
+        //             today: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$matches",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", startOfDay] },
+        //                                 { $lte: ["$$user.createdAt", endOfDay] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    },
-                    week: {
-                        $size: {
-                            $filter: {
-                                input: "$matches",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", lastWeekStart] },
-                                        { $lte: ["$$user.createdAt", lastWeekEnd] }
-                                    ]
+        //                 }
+        //             },
+        //             week: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$matches",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", lastWeekStart] },
+        //                                 { $lte: ["$$user.createdAt", lastWeekEnd] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    },
-                    month: {
-                        $size: {
-                            $filter: {
-                                input: "$matches",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", lastMonthStart] },
-                                        { $lte: ["$$user.createdAt", lastMonthEnd] }
-                                    ]
+        //                 }
+        //             },
+        //             month: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$matches",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", lastMonthStart] },
+        //                                 { $lte: ["$$user.createdAt", lastMonthEnd] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    },
-                    quater: {
-                        $size: {
-                            $filter: {
-                                input: "$matches",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", last3MonthStart] },
-                                        // { $lte: ["$$user.createdAt", l] }
-                                    ]
+        //                 }
+        //             },
+        //             quater: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$matches",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", last3MonthStart] },
+        //                                 // { $lte: ["$$user.createdAt", l] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    },
-                    year: {
-                        $size: {
-                            $filter: {
-                                input: "$matches",
-                                as: "user",
-                                cond: {
-                                    $and: [
-                                        { $gte: ["$$user.createdAt", lastYearStart] },
-                                        // { $lte: ["$$user.createdAt", l] }
-                                    ]
+        //                 }
+        //             },
+        //             year: {
+        //                 $size: {
+        //                     $filter: {
+        //                         input: "$matches",
+        //                         as: "user",
+        //                         cond: {
+        //                             $and: [
+        //                                 { $gte: ["$$user.createdAt", lastYearStart] },
+        //                                 // { $lte: ["$$user.createdAt", l] }
+        //                             ]
 
-                                },
-                            }
+        //                         },
+        //                     }
 
-                        }
-                    }
+        //                 }
+        //             }
 
-                }
-            }
-        ])
+        //         }
+        //     }
+        // ])
+
+       let totalUsers=await userSchema.find({ emailVerified: true}).countDocuments()
+
+       let totalShops=await shopModel.find({ }).countDocuments()
+
+        let totalQueries=await QuerySchema.find({ }).countDocuments()
+
 
         return res.status(responseStatus.success).json(utils.successResponse(messages.dashboard, {
-            userDate: userList[0],
-            matchData: matchList[0]
+            totalUsers: totalUsers,
+            totalShops:totalShops,
+            queries:totalQueries
         }))
     }
     catch (err) {
@@ -1004,7 +1012,7 @@ module.exports.addShop = async (req, res, next) => {
 module.exports.shopView = async (req, res, next) => {
     const id = req.body.id
      if (!utils.validMongoId(id)) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
-    const shopExists = await shopSchema.findOne({ _id: id }).populate('users')
+    const shopExists = await shopSchema.findOne({ _id: id }).populate('rentUser')
     if (shopExists) return res.status(responseStatus.success).json(utils.successResponse(messages.shopDetails, shopExists))
     else return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
 
@@ -1102,13 +1110,13 @@ module.exports.shopVisitors = async (req, res, next) => {
 
 module.exports.shopEdit = async (req, res, next) => {
 
-    const { name,status, id } = req.body
+    const { name,status, id,user } = req.body
     if (!utils.validMongoId(id)) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
 
     const shopExists = await shopSchema.findOne({ _id: id }).select('_id imageUrl').lean()
     if (!shopExists) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
 
-   let shopData =  await shopSchema.findOneAndUpdate({ _id: shopExists._id }, { name, status },{new:true})
+   let shopData =  await shopSchema.findOneAndUpdate({ _id: shopExists._id }, { name, status,rentUser:user?user:null },{new:true})
     return res.status(responseStatus.success).json(utils.successResponse("Shop updated successfully.",shopData))
 }
 

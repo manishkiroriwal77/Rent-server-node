@@ -5,6 +5,7 @@ const shopSchema = mongoose.Schema({
     name: { type: String },
     status: { type: String, enum:["rented","non-rented"] },
     users: [{ type: mongoose.Types.ObjectId, default: null, ref: 'user'}],
+    rentUser:{type: mongoose.Types.ObjectId, default: null, ref: 'user'}
 
 }, { timestamps: true })
 
