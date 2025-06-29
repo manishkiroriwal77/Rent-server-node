@@ -1204,11 +1204,7 @@ module.exports.QueryList = async (req, res, next) => {
                 }
 
             }] : []),
-            {
-                $sort: {
-                    createdAt: -1
-                }
-            },
+            
             {
                 $lookup:{
                     from:"users",
@@ -1219,6 +1215,13 @@ module.exports.QueryList = async (req, res, next) => {
                 }
             },
             {$unwind:{path:"$user",preserveNullAndEmptyArrays:true}},
+                        ...(sort && order
+                ? [
+                    {
+                    $sort: { [sort]: order },
+                    },
+                ]
+                : [{ $sort: { createdAt: -1 } }]),
             {
                 "$facet": {
                     data: pagination,
