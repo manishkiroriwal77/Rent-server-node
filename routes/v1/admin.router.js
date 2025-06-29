@@ -82,6 +82,7 @@ adminRoutes.post(
 adminRoutes.put("/add-coins", auth, adminController.addCoins);
 
 adminRoutes.post("/shop-list", auth, adminController.shopList);
+adminRoutes.post("/shop-visitors-list", auth, adminController.shopVisitors);
 
 adminRoutes.post(
   "/shop-add",

@@ -14,6 +14,7 @@ const shopModel = require('../../models/shop.model')
 const QuerySchema=require('../../models/query.model')
 const { selfExit } = require('./gamePlay.controller')
 const gamePlayhelper = require('./gamePlayhelper')
+const shopRentModel = require('../../models/shopRent.model')
 
 
 //admin auth
@@ -1008,6 +1009,96 @@ module.exports.shopView = async (req, res, next) => {
     else return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
 
 }
+
+module.exports.shopVisitors = async (req, res, next) => {
+    const id = req.body.shopId
+
+
+    if (!utils.validMongoId(id)) return res.status(responseStatus.badRequest).json(utils.errorResponse(messages.shopNotFound))
+
+    const { offset, limit, search, sort, order, type } = req.body
+
+    let pagination = [{ $skip: 0 }, { $limit: 10 }]
+
+
+    if ((offset || offset == 0) && limit) {
+        pagination = [{ $skip: offset }, { $limit: limit }]
+    }
+
+     const list = await shopRentModel.aggregate([
+    { $match: { shopId: utils.parseMongoId(id) } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        as: "users",
+        foreignField: "_id",
+      },
+    },
+
+    {
+        $project: {
+            "users.userName": 1,
+            "users.email": 1,
+            "users.createdAt": 1,
+            "users.isBlock": 1,
+            "users.profileImage": 1,  
+            "users._id": 1,  
+        }
+    },
+
+    ...(search
+      ? [
+          {
+            $match: {
+              $or: [
+                { "users.userName": { $regex: new RegExp(".*" + search + ".*", "i") } },
+                { "users.email": { $regex: new RegExp(".*" + search + ".*", "i") } },
+              ],
+            },
+          },
+        ]
+      : []),
+    {
+      $unwind: "$users",
+    },
+
+    {
+      $replaceRoot: {
+        newRoot: "$users",
+      },
+    },
+
+    ...(sort && order
+      ? [
+          {
+            $sort: { [sort]: order },
+          },
+        ]
+      : [{ $sort: { createdAt: -1 } }]),
+    {
+      $facet: {
+        data: pagination,
+        totalCount: [{ $count: "count" }],
+      },
+    },
+    {
+      $unwind: {
+        path: "$totalCount",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ]);
+
+
+   return res.status(200).json(utils.successResponse(messages.shopVisitorList, {
+        list: list[0]?.data || [],
+        paginationData: utils.paginationData(list[0]?.totalCount?.count || 0, limit || 10, offset || 0)
+    }))
+
+}
+
+
 
 module.exports.shopEdit = async (req, res, next) => {
 

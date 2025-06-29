@@ -53,6 +53,7 @@ module.exports.messages = {
     requestDeclined: "Request declined by the user.",
     blocked: "Your account has been blocked by the admin.",
     shopList: "Shop list fetched successfully.",
+    shopVisitorList: "Shop visitor list fetched successfully.",
     itemNot: "Item doesn't exist.",
     ItemPurchase: "Item purchased successfully.",
     insufficentPurchase: "You don't have sufficient coins to purchase this item.",
